@@ -2,8 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from ultralytics import YOLO
 import os
 import random
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": "https://35fb-182-176-222-244.ngrok-free.app"}})
+
+@app.route('/api/data')
+def get_data():
+    return 'Data from API'
+
+if __name__ == '__main__':
+    app.run()
+
 
 # Assuming your HTML file is named 'index.html' and placed in a folder named 'templates'
 @app.route('/')
