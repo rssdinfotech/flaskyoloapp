@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motilitycapture</title>
+</head>
+<style>
+    /* .grid-column-3-width {
+    } */
+
+    .cam {
+        grid-template-columns: auto 300px;
+        display: grid;
+        overflow: hidden;
+    }
+
+    .video-cam {
+        overflow-y: auto;
+    }
+
+    .capture {
+        margin-left: 114px;
+        margin-top: 51px;
+    }
+
+    .capture-side {
+        background-color: #e6e6e3;
+        width: 100%;
+    }
+
+    .img-sperm {
+        width: 100%;
+        height: 600px;
+    }
+
+    /* .cam-screen {
+        width: 1280px;
+        height: 720px;
+    } */
+</style>
+
+<body>
+
+    <div class="cam overflow-hidden text-red-900">
+        <!-- <div class="video-cam overflow-y-auto">
+            <video id="video" playsinline autoplay></video>
+        </div> -->
+
+        <div>
+             
+            <video class="img-sperm" controls autoplay>
+                <source src="{{url_for('static', filename='Raw.mp4')}}" type="video/mp4" class="img-sperm" />
+                <!-- <source src="Raw.mp4" type="video/mp4" class="img-sperm" />> -->
+                Your browser does not support the video tag.
+              </video>
+        </div>
+        <div class="capture-side">
+            <button id="snap" class="capture">Capture</button>
+            <div alig="center">
+            <form>
+                <input id="total" type="number" class="capture" name="total" placeholder="Total Sperms Count" required>
+                <input id="high_speed" type="number" class="capture" name="a" placeholder="High Speed Sperms Count" required>
+                <input id="medium_speed" type="number" class="capture"name="b" placeholder="Medium Speed Sperms Count" required>
+                <input id="low_speed" type="number" class="capture" name="c" placeholder="Low Speed Sperms Count" required>
+                <input id="dead" type="number" class="capture"name="d" placeholder="Dead Sperms Count" required>
+                  
+                <input type="submit" class="capture"name="submit">
+                    </form>
+                </div>
+        </div>
+
+    </div>
+<script>
+    const captureBtn= document.getElementById('snap')
+
+    
+    
+    
+    // Function to fill input fields with response data
+function fillInputFields(responseData) {
+    document.getElementById('total').value = responseData.total;
+    document.getElementById('high_speed').value = responseData.high_speed;
+    document.getElementById('medium_speed').value = responseData.medium_speed;
+    document.getElementById('low_speed').value = responseData.low_speed;
+    document.getElementById('dead').value = responseData.dead;
+}
+
+    
+    
+    
+    captureBtn.addEventListener('click',()=>{
+            // Make a GET request to the Flask endpoint
+    fetch('http://127.0.0.1:5000/process-video')
+    .then(response => {
+        // Check if the response is successful
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+        // Parse the JSON response
+        return response.json();
+    })
+    .then(data => {
+        // Log the data to the console
+        console.log(data);
+        fillInputFields(data)
+    })
+    .catch(error => {
+        // Log any errors to the console
+        console.error('There was a problem with the fetch operation:', error);
+    });
+
+    })
+</script>
+
+   
+   
+
+    <!-- <canvas id="canvas" width="640" height="480"></canvas> -->
+    <!-- <script>
+
+        'use strict';
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snap = document.getElementById("snap");
+        const errorMsgElement = document.querySelector('span#errorMsg');
+
+        const constraints = {
+            audio: true,
+            video: {
+                width: 1280, height: 720
+            }
+        };
+
+        // Access webcam
+        async function init() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                handleSuccess(stream);
+            } catch (e) {
+                errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+            }
+        }
+
+        // Success
+        function handleSuccess(stream) {
+            window.stream = stream;
+            video.srcObject = stream;
+        }
+
+        // Load init
+        init();
+
+        // Draw image
+        var context = canvas.getContext('2d');
+        snap.addEventListener("click", function () {
+            context.drawImage(video, 0, 0, 640, 480);
+        });
+    </script> -->
+
+</body>
+
+</html>
