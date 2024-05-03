@@ -5,7 +5,7 @@ import random
 from flask_cors import CORS
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": "https://35fb-182-176-222-244.ngrok-free.app"}})
+cors = CORS(app, resources={r"/*": {"origins": "http://primeandrocare.com"}})
 
 @app.route('/api/data')
 def get_data():
