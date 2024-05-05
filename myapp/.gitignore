@@ -1,3 +1,4 @@
-myenv
-runs
+myenv/
+../myenv/
+./myenv/
 

@@ -2,7 +2,7 @@ import os
 import shutil
 
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 RUNS_FOLDER = 'runs'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'wmv', 'flv'}
 

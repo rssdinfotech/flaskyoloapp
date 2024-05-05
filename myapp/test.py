@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify,send_file
+from flask import Flask, render_template, request, redirect, url_for, jsonify,send_file,current_app
 from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import os
 import random
 from utils import clean_uploads_folder, clean_runs_folder, allowed_file
 from flask_cors import CORS
-import shutil 
+import re
 app = Flask(__name__)
 # cors = CORS(app, resources={r"/*": {"origins": "http://primeandrocare.com"}})
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -13,8 +13,8 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 # Define the folder where uploaded files will be stored
-UPLOAD_FOLDER = 'static/uploads'
-RUNS_FOLDER = 'static/runs'
+UPLOAD_FOLDER = 'uploads'
+RUNS_FOLDER = 'runs'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'wmv', 'flv'}
 
 # Define the directory where video files are stored
@@ -23,10 +23,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Assuming your HTML file is named 'index.html' and placed in a folder named 'templates'
 @app.route('/')
-def test():
+def index():
     return render_template('index.html')
 @app.route('/test')
-def index():
+def test():
     return render_template('test.html')
 
 @app.route('/upload', methods=['POST'])
@@ -69,9 +69,6 @@ def process_video():
     
     clean_runs_folder()
     results = model(source=media_path, show=False, line_width=1, show_conf=False, save=True)
-  
-    
-    
     
     # You can adjust the speed calculations or generate them randomly as before
     total = random.randrange(250, 310)
@@ -108,5 +105,39 @@ def get_video(filename):
 
 
 
+
+
+@app.route("/video", methods=["GET"])
+def video():
+    headers = request.headers
+    if not "range" in headers:
+        return current_app.response_class(status=400)
+
+    # video_path = os.path.abspath(os.path.join("media", "test.mp4"))
+    video_path = os.path.join(VIDEO_FOLDER,'firstReel.mp4')
+    size = os.stat(video_path)
+    size = size.st_size
+
+    chunk_size = (10 ** 6) * 3 #1000kb makes 1mb * 3 = 3mb (this is based on your choice)
+    start = int(re.sub("\D", "", headers["range"]))
+    end = min(start + chunk_size, size - 1)
+
+    content_lenght = end - start + 1
+
+    def get_chunk(video_path, start, chunk_size):
+        with open(video_path, "rb") as f:
+            f.seek(start)
+            chunk = f.read(chunk_size)
+        return chunk
+
+    headers = {
+        "Content-Range": f"bytes {start}-{end}/{size}",
+        "Accept-Ranges": "bytes",
+        "Content-Length": content_lenght,
+        "Content-Type": "video/mp4",
+    }
+
+    return current_app.response_class(get_chunk(video_path, start,chunk_size), 206, headers)
+
 if __name__ == '__main__':
-    app.run(debug=True,port=5003)
+    app.run(debug=True,port=9000)
