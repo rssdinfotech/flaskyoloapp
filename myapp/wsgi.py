@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify,se
 from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import os
+import subprocess
 import random
 from utils import clean_uploads_folder, clean_runs_folder, allowed_file
 from flask_cors import CORS
@@ -71,7 +72,21 @@ def process_video():
     results = model(source=media_path, show=False, line_width=1, show_conf=False, save=True)
   
     
-    
+
+    #video_path = os.path.join(VIDEO_FOLDER, uploaded_file)
+    directory = VIDEO_FOLDER
+    for filename in os.listdir(VIDEO_FOLDER):
+        if filename.lower().endswith(".avi"):
+            full_path = os.path.join(directory, filename)
+            base_name, _ = os.path.splitext(filename) 
+            new_filename = base_name + ".mp4"    
+            new_full_path = os.path.join(directory, new_filename)
+
+            try:
+                subprocess.run(["ffmpeg", "-i", full_path, new_full_path])
+                print(f"Converted '{filename}' to '{new_filename}'")
+            except Exception as e:
+                print(f"Error converting '{filename}': {e}")
     
     # You can adjust the speed calculations or generate them randomly as before
     total = random.randrange(250, 310)
@@ -109,4 +124,4 @@ def get_video(filename):
 
 
 if __name__ == '__main__':
-    app.run(debug=True,port=5003)
+    app.run(debug=True)
