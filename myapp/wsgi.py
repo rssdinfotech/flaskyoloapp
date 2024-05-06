@@ -6,6 +6,8 @@ import subprocess
 import random
 from utils import clean_uploads_folder, clean_runs_folder, allowed_file
 from flask_cors import CORS
+import numpy as np
+import pandas as pd
 import shutil 
 app = Flask(__name__)
 # cors = CORS(app, resources={r"/*": {"origins": "http://primeandrocare.com"}})
@@ -64,13 +66,27 @@ def process_video():
 
     
     media_path = os.path.join(app.config['UPLOAD_FOLDER'], uploaded_file)
-
-    model = YOLO('best.pt')
-    save_dir = os.getcwd()
-    
     clean_runs_folder()
-    results = model(source=media_path, show=False, line_width=1, show_conf=False, save=True)
-  
+    # Load the model
+    model = YOLO("best.pt")
+    names=model.names
+
+    # Use the model
+    results = model(source=media_path, show=False, line_width=1, show_conf=False, save=True, max_det=1000)
+
+    TC = []
+    for result in results:
+        id = list(names)[list(names.values()).index('sperm')]
+        TC.append(result.boxes.cls.tolist().count(id))
+
+    series = pd.Series(TC)
+
+
+    total = round(series.describe().iloc[-1])
+    high_speed = len([speed for speed in TC if speed < series.describe().iloc[7]])
+    dead = len([speed for speed in TC if speed < series.describe().iloc[4]])
+    low_speed = len([speed for speed in TC if speed > series.describe().iloc[4]]) + len([speed for speed in TC if speed < series.describe().iloc[5]])
+    medium_speed = total - (high_speed + low_speed + low_speed)
     
 
     #video_path = os.path.join(VIDEO_FOLDER, uploaded_file)
@@ -89,11 +105,11 @@ def process_video():
                 print(f"Error converting '{filename}': {e}")
     
     # You can adjust the speed calculations or generate them randomly as before
-    total = random.randrange(250, 310)
-    high_speed = random.randrange(20, 35)
-    dead = random.randrange(15, 30)
-    low_speed = random.randrange(70, 110)
-    medium_speed = total - (high_speed + dead + low_speed)
+    # total = random.randrange(250, 310)
+    # high_speed = random.randrange(20, 35)
+    # dead = random.randrange(15, 30)
+    # low_speed = random.randrange(70, 110)
+    # medium_speed = total - (high_speed + dead + low_speed)
 
     return jsonify({
         'total': total,
