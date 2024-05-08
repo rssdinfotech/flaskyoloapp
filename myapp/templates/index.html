@@ -1,213 +1,1481 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Motilitycapture</title>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sperm</title>
+    <link rel="stylesheet" href="/static/css/index.css">
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div class="flex">
-      <!-- Left side: Video display -->
-      <div class="w-2/3 p-4">
-        <h1 class="text-lg font-bold mb-4">Video Display</h1>
-        <video id="uploadedVideo" class="w-full" controls>
-          <source id="videoSource" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-
-      <!-- Right side: Options and buttons -->
-      <div class="w-1/3 p-4">
-        <h1 class="text-lg font-bold mb-4">Options</h1>
-        <div class="mb-4">
-          <button
-            id="uploadBtn"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          >
-            Upload Video
-          </button>
-          <button
-            id="processBtn"
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
-            disabled
-          >
-            Process Video
-          </button>
-        </div>
-        <div class="mb-4">
-          <input
-            id="total"
-            type="number"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Total Sperms Count"
-            readonly
-          />
-          <input
-            id="high_speed"
-            type="number"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="High Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="medium_speed"
-            type="number"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Medium Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="low_speed"
-            type="number"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Low Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="dead"
-            type="number"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Dead Sperms Count"
-            readonly
-          />
-        </div>
-        <div id="statusMessage" class="text-red-600"></div>
-      </div>
-    </div>
-
-    <!-- File input and upload button -->
-    <input type="file" id="fileInput" class="hidden" />
-
-    <script>
-      // below js is just for styling
-      // File input and upload button
-      const fileInput = document.getElementById("fileInput");
-      const uploadBtn = document.getElementById("uploadBtn");
-      const processBtn = document.getElementById("processBtn");
-      const statusMessage = document.getElementById("statusMessage");
-
-      // Function to handle file upload
-
-      const videoplayer = document.getElementById("player");
-      function handleFileUpload(file) {
-        const formData = new FormData();
-        formData.append("video", file);
-
-        fetch("/upload", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Upload failed");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Upload successful:", data);
-            // Enable the process button after successful upload
-            document.getElementById("processBtn").disabled = false;
-            // Set the source of the uploaded video element
-
-            document.getElementById("uploadedVideo").pause(); // Reload the video player
-            document.getElementById("videoSource").src =
-              "/static/uploads/" + data.filename;
-            document.getElementById("uploadedVideo").load(); // Reload the video player
-            document.getElementById("uploadedVideo").play(); // Start playing the video
-
-            statusMessage.textContent = "Upload Successful";
-            localStorage.setItem("filename", data.filename);
-          })
-          .catch((error) => {
-            console.error("Error uploading file:", error);
-          });
-      }
-
-      // Function to process the video
-      function processVideo() {
-        statusMessage.textContent = "Processing you video please wait";
-
-        const filename = localStorage.getItem("filename");
-        fetch("/process-video", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: filename }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log(data);
-            // Fill input fields with processed data
-            document.getElementById("total").value = data.total;
-            document.getElementById("high_speed").value = data.high_speed;
-            document.getElementById("medium_speed").value = data.medium_speed;
-            document.getElementById("low_speed").value = data.low_speed;
-            document.getElementById("dead").value = data.dead;
-
-            document.getElementById("uploadedVideo").pause(); // Reload the video player
-            document.getElementById("videoSource").src =
-              "/get-video/" + filename;
-            document.getElementById("uploadedVideo").load(); // Reload the video player
-            document.getElementById("uploadedVideo").play(); // Start playing the video
-
-
-
-            statusMessage.textContent = "Video processing successful";
-            statusMessage.classList.remove("text-red-600");
-            statusMessage.classList.add("text-green-600");
-
-      
-          })
-          .catch((error) => {
-            statusMessage.textContent = "Video processing failed";
-            statusMessage.classList.remove("text-green-600");
-            statusMessage.classList.add("text-red-600");
-            console.error(
-              "There was a problem with the fetch operation:",
-              error
-            );
-          });
-      }
-
-      // Event listener for file input change
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", (event) => {
-          const file = event.target.files[0];
-          if (file) {
-            handleFileUpload(file);
-          }
-        });
-
-      // Event listener for upload button click
-      document.getElementById("uploadBtn").addEventListener("click", () => {
-        document.getElementById("fileInput").click();
-      });
-
-      // Event listener for process button click
-      document
-        .getElementById("processBtn")
-        .addEventListener("click", processVideo);
-
-      // Event listener for upload button click
-      uploadBtn.addEventListener("click", () => {
-        fileInput.click();
-      });
-
-      // Event listener for file input change
-      fileInput.addEventListener("change", () => {
-        processBtn.disabled = false;
-        statusMessage.textContent = "";
-      });
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
 
     </script>
-  </body>
+    <!-- <script src="script.js"></script> -->
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <!-- header -->
+    <div class=''>
+        <div class='bg-gray-200'>
+            <ul class='flex gap-[1px]'>
+
+                <li class='bg-gray-50 py-[2px] px-12 text-[12px]'><a href="index.html">Database</a></li>
+                <li class='bg-gray-50 py-[2px] px-12 text-[12px]'><a href="Imageside.html">Image</a></li>
+                <li class='bg-gray-50 py-[2px] px-12 text-[12px]'><a href="Measurementside.html">Measurements</a></li>
+                <li class='bg-gray-50 py-[2px] px-12 text-[12px]'><a href="Vitality.html">Vitality</a></li>
+                <li class='bg-gray-50 py-[2px] px-12 text-[12px]'><a href="Dna.html">DNA</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- sub header -->
+    <div class='subheader'>
+        <!-- <div className='flex items-center gap-2'> -->
+        <!-- 1 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown1')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/Camera-1.png">
+                        <p>Input</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown1" class="dropdown-content">
+                <a href="#">
+                    <div class='flex items-center text-[12px] gap-2'><img src="/static/asset/Camera-1.png" alt="camera"
+                            class="w-[25px]">
+                        <p class="text-[12px] ">TWAIN</p>
+                    </div>
+                </a>
+                <a href="#" class="text-[12px] ml-8"> Select TV Device</a>
+
+                <a href="#">
+                    <div class='flex items-center text-[12px] gap-2'><img src="/static/asset/Video-.png" alt="camera"
+                            class="w-[30px]" />
+                        <p class="text-[12px]">TV</p>
+                    </div>
+                </a>
+                <a href="#" class="text-[12px] ml-8"> Select TV Device</a>
+            </div>
+        </div>
+        <!-- 2 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown2')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+
+                        <img class="img-cam" src="/static/asset/notebook-icon-.png">
+                        <p>New record</p>
+
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown2" class="dropdown-content">
+                <a href="#" class="text-[12px] ml-8">New Record Option</a>
+                <a href="#">
+                    <div class='flex items-center text-[12px] gap-2'><img src="/static/asset/Camera-1.png" alt="camera"
+                            class="w-[25px]">
+                        <p class="text-[12px] ">TWAIN</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+        <!-- 3 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown3')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/Padlock-16.png">
+                        <p>Unlock</p>
+                    </div>
+                    <!-- <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div> -->
+                </div>
+            </button>
+            <!-- <div id="dropdown3" class="dropdown-content">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div> -->
+        </div>
+        <!--  -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown4')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/notebook-icon-.png">
+                        <p>Text</p>
+                    </div>
+                    <!-- <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div> -->
+                </div>
+            </button>
+            <!-- <div id="dropdown4" class="dropdown-content">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div> -->
+        </div>
+        <!-- 4 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown4')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/trash_can.png">
+                        <p>To Bin</p>
+                    </div>
+                    <!-- <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div> -->
+                </div>
+            </button>
+            <!-- <div id="dropdown4" class="dropdown-content">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div> -->
+        </div>
+        <!-- 5 -->
+        <!-- <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown5')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/pngtree-sperm.png">
+                        <p>Motility</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown5" class="dropdown-content">
+                <a href="#home" class="ml-10 text-[12px]">copy table to clipboard</a>
+            </div>
+        </div> -->
+
+        <!-- <button id="openModal" class="button">Open Modal</button>
+        <div id="modal" class="modal">
+            <button id="closeModal" class="close">&times;</button>
+            <div>
+                <div class="bg-white w-[300px] h-[200px] text-center pt-[100px]">
+                    <form action="">
+                        <input type="file" accept="">
+                    </form>
+                </div>
+            </div>
+        </div> -->
+
+
+        <!--  -->
+        <div>
+            <a href="/motilitycapture">
+                <div>
+                    <img class="img-cam" src="/static/asset/pngtree-sperm.png">
+                    <p>Motility</p>
+                </div>
+            </a>
+        </div>
+
+        <!--6  -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown6')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/Blue-Circle.png">
+                        <p>Morphology</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown6" class="dropdown-content">
+                <a href="#home" class="ml-10 text-[12px]">copy table to clipboard</a>
+
+            </div>
+        </div>
+        <!-- 7 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown7')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/pngtree-circle-sc.png">
+                        <p>Vitality</p>
+                    </div>
+                    <!-- <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div> -->
+                </div>
+            </button>
+            <!-- <div id="dropdown7" class="dropdown-content">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div> -->
+        </div>
+        <div>
+            <select name="" class="pr-40 border border-black text-[13px]">
+                <option value="">All records</option>
+                <option value="">dnfslgn</option>
+                <option value="">dnfslgn</option>
+
+                <option value="">dnfslgn</option>
+
+                <!-- Add more options as needed -->
+            </select>
+
+        </div>
+        <!-- 8 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown8')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/printer-icon.png">
+                        <p>Report</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown8" class="dropdown-content">
+                <button id="myBtn">Open Modal</button>
+
+                <!-- The Modal -->
+                <div id="myModal" class="modal">
+
+                    <!-- Modal content -->
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <p>Some text in the Modal..</p>
+                    </div>
+
+                </div>
+                <!-- <a href="#">Report options</a> -->
+                <a href="#">Generate new template</a>
+                <a href="#">Edit template</a>
+                <a href="#">BasicCharts</a>
+                <a href="#">ExtFullReport </a>
+                <a href="#">ExtFullReportDNAVit</a>
+                <a href="#">ExtMorphology </a>
+                <a href="#">Morphology </a>
+                <a href="#">Motility </a>
+
+            </div>
+        </div>
+        <!-- 9 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown9')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/settings-icon-25.png">
+                        <p>Options</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown9" class="dropdown-content">
+                <!-- 1 -->
+                <button id="openModal1" class="button ml-4 text-[12px]">Select Calibration</button>
+                <!-- Modal 1 -->
+                <div id="myModal1" class="modal">
+                    <div class="modal-content">
+                        <span id="closeModal1" class="close">&times;</span>
+                        <div className='flex flex-col bg-slate-200'>
+                            <div className='bg-red-100 '>
+                                <p>Template parameters</p>
+                            </div>
+                            <div className='flex flex-col gap-3 p-5 py-7'>
+
+                                <p className='font-bold'>Calibrations</p>
+
+                                <div>
+                                    <ul className='bg-white border border-black p-1 flex flex-col gap-1'>
+                                        <li>Motility</li>
+                                        <li>Morphology</li>
+                                        <li>Vitality</li>
+                                        <li>DNA_40x</li>
+                                    </ul>
+                                </div>
+                                <div className='flex gap-3 justify-center mt-5'>
+                                    <button className=' bg-white px-16 py-1'>Delete</button>
+                                </div>
+                                <div className='ml-8 mt-2'>
+                                    <div className='flex flex-col gap-4'>
+                                        <p className='text-[12px] font-bold'>Coefficient:</p>
+                                        <p>0.3846/pixel</p>
+                                    </div>
+                                    <div className='flex mt-5'>
+                                        <p className='w-[100px]'>Units:</p>
+                                        <select name="selectedFruit"
+                                            className="pr-16 w-[50px] border border-black text-[13px]">
+                                            <option value="">m</option>
+                                            <option value="">inch</option>
+                                            <option value="">Cm</option>
+                                            <option value="">mm</option>
+                                            <option value="">pix</option>
+                                            <option value="">m</option>
+
+                                        </select>
+                                    </div>
+                                    <div className='flex gap-3 justify-center mt-3'>
+                                        <button className=' bg-white px-16 py-1'>Assign to analysis</button>
+                                    </div>
+                                    <div className='flex gap-3 justify-center mt-5'>
+                                        <button className=' bg-white px-8'>Ok</button>
+                                        <button className=' bg-white px-8'>Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 2 -->
+
+                <!-- <a href="#">Select Calibration</a> -->
+                <a href="#">New Calibr</a>
+                <a href="#">Edit Database</a>
+                <a href="#">Browse Record</a>
+                <a href="#">Create backup</a>
+                <a href="#">Restore backup</a>
+                <a href="#">Search</a>
+                <a href="#">Table view</a>
+                <a href="#" class="">Send mail &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp;F12
+                    <!-- <p>Send mail</p>
+                    <p>F12</p> -->
+                </a>
+                <a href="#">Calculation</a>
+            </div>
+        </div>
+        <!-- 10 -->
+        <div class="dropdown">
+            <button onclick="toggleDropdown('dropdown10')" class="dropbtn">
+                <div class="btn-drop">
+                    <div>
+                        <img class="img-cam" src="/static/asset/ques.png">
+                        <p>Help</p>
+                    </div>
+                    <div class="icons">
+                        <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </button>
+            <div id="dropdown10" class="dropdown-content">
+                <a href="#">About</a>
+                <a href="#">Check Update</a>
+            </div>
+        </div>
+
+    </div>
+    <div class='p-[1px] pt-0'>
+        <div class="grid grid-column-3-width  p-1 mt-[-8px]  h-screen overflow-hidden">
+            <!-- side -->
+            <div class='side'>
+                <div class='text-center'>
+                    <label class='font-bold '>April, 2024 </label>
+                    <div class='overflow-y-scroll pt-[500px] mt-[-30px]'></div>
+                </div>
+            </div>
+            <!-- center -->
+            <div class='center'>
+                <div class='flex flex-col gap-3 items-center mt-3 '>
+                    <a href="/Imagepagezoom1" class='flex items-center '>
+                        <img src="/static/asset/Screenshot-1.png" alt="" class="w-[150px]" />
+
+                    </a>
+                    <a href="/Imagepagezoom2" class='flex items-center '>
+                        <img src="/static/asset/Screenshot-1.png" alt="" class="w-[150px]" />
+                    </a>
+                    <a href="/Imagepagezoom3" class='flex items-center '>
+                        <img src="/static/asset/Screenshot-1.png" alt="" class="w-[150px]" />
+                    </a>
+                </div>
+            </div>
+            <!--PatientDetails  -->
+            <div class='patient  overflow-y-auto '>
+                <div class=' ml-5 mt-10 text-[11px] font-medium'>
+                    <div class='flex gap-3'>
+                        <div class='flex flex-col gap-3 '>
+                            <div class=' flex'>
+                                <label class='w-[15%]'>Patient </label>
+                                <input type="text" class='border w-[400px]' />
+                            </div>
+                            <div class='flex'>
+                                <label class='w-[15%]'>Address</label>
+                                <input type="text" class='border w-[400px]' />
+                            </div>
+                        </div>
+                        <div class='flex flex-col gap-3 '>
+                            <div class=' flex'>
+                                <label class='w-[65%]'>Birth </label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex'>
+                                <label class='w-[55%]'>Date of sample</label>
+                                <input type="text" class='border w-[160px]' />
+                            </div>
+                        </div>
+                        <div class='flex flex-col gap-3 '>
+                            <div class=' flex'>
+                                <label class='w-[19%]'>Age </label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex'>
+                                <label class='w-[20%]'>Code</label>
+                                <input type="text" class='border w-[170px]' />
+                            </div>
+                        </div>
+                    </div>
+                    <p class='mt-5'>SAMPLE DESCRIPTION</p>
+                    <div class='mt-3 flex'>
+                        <div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Volume,mi</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Abstination, days</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Liquefaction, min</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Agglutination</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                        </div>
+                        <div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Lost ejaculate</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Smell</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Color</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Agglutination</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                        </div>
+                        <div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Mucus</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Leothin</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>Viscosity</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                            <div class='flex w-[275px]'>
+                                <label class='w-[40%]'>pH</label>
+                                <input type="text" class='border w-[150px]' />
+                            </div>
+                        </div>
+                        <div>
+                            <div class='flex w-[200px]'>
+                                <label class='w-[20%]'>MAR</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                    </div>
+                    <p class='mt-5'>MOTILITY</p>
+
+
+                    {% if results %}
+                <div>
+                    <label for="">Total sperms</label>
+                    <p>{{ results[1] }}</p>
+                    <label for="">High speed sperms</label>
+                    <p>{{ results[2] }}</p>
+                    <label for="">Medium speed sperms</label>
+                    <p>{{ results[3] }}</p>
+                    <label for="">Low speed sperms</label>
+                    <p>{{ results[4] }}</p>
+                    <label for="">dead sperms</label>
+                    <p>{{ results[5] }}</p>
+                </div>
+                {% endif %}
+                    <div class='mt-3 flex '>
+
+
+                        <div class='flex w-[370px]'>
+                            <label className='w-[40%]'>Motility, sperms analyzed</label>
+                            <input type="text" class='border w-[50px]' />
+                        </div>
+
+                        <div class='flex w-[235px]'>
+                            <label class='w-[40%]'>Fields analyzed</label>
+                            <input type="text" class='border w-[70px]' />
+                        </div>
+                    </div>
+                    <div class='flex mt-3'>
+
+                        <div class=''>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Concentration, M/ml</label>
+                                <input type="text" class='border w-[65px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B, %</label>
+                                <input type="text" class='border w-[65px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class A, %</label>
+                                <input type="text" classclassName='border w-[65px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class B, &</label>
+                                <input type="text" class='border w-[65px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class C, %</label>
+                                <input type="text" class='border w-[65px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class D, %</label>
+                                <input type="text" class='border w-[65px]' />
+                            </div>
+                        </div>
+
+                        <div class='ml-2'>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Status concentration</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Status A+B;</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class A, M/ml</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class B, M/ml</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class C, M/ml</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class D, M/ml</label>
+                                <input type="text" class='border w-[58px]' />
+                            </div>
+                        </div>
+
+                        <div class='ml-2'>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Total number, M</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B+c, %</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class A, total</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class B, total</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class C, total</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Class D, total</label>
+                                <input type="text" class='border w-[55px]' />
+                            </div>
+                        </div>
+
+                        <div class='ml-2'>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Status total number:</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>Status A+B+C;</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B, total</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B, M/ml</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B+C, total</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                            <div class='flex w-[180px]'>
+                                <label class='w-[65%]'>A+B+C, M/ml</label>
+                                <input type="text" class='border w-[50px]' />
+                            </div>
+                        </div>
+
+                        <div class='ml-2'>
+                            <div class='flex w-[212px]'>
+                                <label class='w-[70%]'>Round cells, M/ml</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[212px]'>
+                                <label class='w-[70%]'>White blood cells, M/ml</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[212px]'>
+                                <label class='w-[70%]'>Immature germ cells, M/ml</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                    </div>
+                    <p class='mt-5'>VITALITY</p>
+
+                    <div class='flex mt-3'>
+                        <div class='flex w-[175px]'>
+                            <label class='w-[90%]'>Vitality, sperms analyzed</label>
+                            <input type="text" class='border w-[45px]' />
+                        </div>
+                        <div class='flex w-[105px] ml-2'>
+                            <label class='w-[55%]'>Vitality, %</label>
+                            <input type="text" class='border w-[40px]' />
+                        </div>
+                        <div class='flex w-[90px]'>
+                            <label class='w-[55%]'>Dead, %</label>
+                            <input type="text" class='border w-[40px]' />
+                        </div>
+                        <div class='flex w-[125px] ml-2'>
+                            <label class='w-[70%]'>Status, Vitality</label>
+                            <input type="text" class='border w-[45px]' />
+                        </div>
+                        <div class='flex w-[165px] ml-2'>
+                            <label class='w-[70%]'>Live, total number, M</label>
+                            <input type="text" class='border w-[45px]' />
+                        </div>
+
+                    </div>
+                    <p class='mt-5'>MORPHOLOGY</p>
+
+                    <div class='flex mt-3'>
+                        <div class='flex w-[235px]'>
+                            <label class='w-[70%]'>Morphology, sperms analyzed</label>
+                            <input type="text" class='border w-[75px]' />
+                        </div>
+                        <div class='flex w-[125px] ml-2'>
+                            <label class='w-[70%]'>Norm, %</label>
+                            <input type="text" class='border w-[75px]' />
+                        </div>
+                        <div class='flex w-[180px] ml-2'>
+                            <label class='w-[70%]'>Status morphology:</label>
+                            <input type="text" class='border w-[75px]' />
+                        </div>
+                        <div class='flex w-[200px] ml-2'>
+                            <label class='w-[70%]'>Norm, total number, M</label>
+                            <input type="text" class='border w-[75px]' />
+                        </div>
+                        <div class='flex w-[125px] ml-2'>
+                            <label class='w-[70%]'>TZI/MAI</label>
+                            <input type="text" class='border w-[75px]' />
+                        </div>
+
+                    </div>
+                    <div class='flex mt-3 '>
+                        <div>
+                            <p>% rel, to total</p>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Head pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Neck pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Tail pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>ERC</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                        <div>
+                            <p>% rel, to anomalies</p>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Head pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Neck pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>Tail pathology</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[230px]'>
+                                <label class='w-[55%]'>ERC</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                    </div>
+                    <div class='mt-3 flex'>
+                        <div class=''>
+                            <p>HEAD DEFFECTS</p>
+                            <div class='flex mt-3'>
+                                <div>
+                                    <p>% rel, to total</p>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Tapered</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Pyriform</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous1</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous2</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous3</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Vacuolated</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Round, no acrosome</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Round, small</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Small acrosome</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Double head</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Pinhead</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p>% rel, to anomalies</p>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Tapered</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Pyriform</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous1</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous2</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Amorphous3</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Vacuolated</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Round, no acrosome</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Round, small</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Small acrosome</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Double head</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                    <div class='flex w-[160px]'>
+                                        <label class='w-[55%]'>Pinhead</label>
+                                        <input type="text" class='border w-[40px]' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=''>
+
+                            <div>
+                                <div>
+                                    <p>NECK AND MIDPIECE DEFECTS</p>
+                                    <div class='flex mt-3'>
+                                        <div>
+                                            <p>% rel, to total</p>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Bent neck</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Asymmentrical</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Thick insertion</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Thin</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p>% rel, to anomalies</p>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Bent neck</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Asymmentrical</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Thick insertion</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Thin</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='mt-3'>
+                                    <p>TAIL DEFECTS</p>
+
+                                    <div class='flex mt-3'>
+                                        <div>
+                                            <p>% rel, to total</p>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Short</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Bent</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Coiled</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Double tail</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p>% rel, to anomalies</p>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Short</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Bent</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Coiled</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                            <div class='flex w-[160px]'>
+                                                <label class='w-[55%]'>Double tail</label>
+                                                <input type="text" class='border w-[40px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='mt-3'>
+                        <p>DNA FRAGMENTATION</p>
+                        <div class='flex mt-3'>
+                            <div class='flex w-[170px]'>
+                                <label class='w-[70%]'>DNA, sperms analyzed</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[130px] ml-3'>
+                                <label class='w-[70%]'>medium halo, %</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[130px] ml-3'>
+                                <label class='w-[70%]'>Without halo, %</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[105px] ml-3'>
+                                <label class='w-[70%]'>DFI</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                        <div class='flex'>
+                            <div class='flex w-[170px] '>
+                                <label class='w-[70%]'>Big halo, %</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[130px] ml-3'>
+                                <label class='w-[70%]'>Smell halo, %</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[130px] ml-3'>
+                                <label class='w-[70%]'>Degraded, %</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                            <div class='flex w-[105px] ml-3'>
+                                <label class='w-[70%]'>Status DNA</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                        <div class=' mt-3'>
+                            <label class='w-[15%]'>Result</label>
+                            <input type="text" class='border w-[530px] ml-3' />
+                        </div>
+                    </div>
+                    <div class='mt-3'>
+                        <p>STATISTICS</p>
+                        <div class='mt-3'>
+                            <div class='flex'>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_VCL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_VSL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_VAP</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_ALH</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_BCF</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_LIN</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_STR</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_WOB</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>A_MAD</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='flex'>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_VCL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_VSL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_VAP</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_ALH</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_BCF</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_LIN</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_STR</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_WOB</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>B_MAD</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='flex'>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_VCL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_VSL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_VAP</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_ALH</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_BCF</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_LIN</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_STR</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_WOB</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>C_MAD</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='flex '>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_VCL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_VSL</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_VAP</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_ALH</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_BCF</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_LIN</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_STR</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_WOB</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>D_MAD</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='mt-3'>
+                        <div class='flex '>
+                            <p class='w-[6%]'>Norm</p>
+                            <div class='flex '>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>N_Area</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[95px]'>
+                                    <label class='w-[80%]'>N_Length</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>N_Width</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>N_Elongation</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>N_Acrosome</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>N_FFE</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                        </div>
+                        <div class='flex '>
+                            <p class='w-[6%]'>Pathology</p>
+                            <div class='flex '>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>P_Area</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[95px]'>
+                                    <label class='w-[80%]'>P_Length</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>P_Width</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>P_Elongation</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px]'>
+                                    <label class='w-[50%]'>P_Acrosome</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[90px] '>
+                                    <label class='w-[50%]'>P_FFE</label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='flex '>
+                        <div class='flex mt-3 items-center'>
+                            <label class='w-[10%]'>Conclusion</label>
+                            <input type="text" class='border w-[430px] ml-3' />
+                        </div>
+                        <div class='flex mt-3 items-center ml-3'>
+                            <label class='w-[20%]'>Physician</label>
+                            <input type="text" class='border w-[160px] ml-3' />
+                        </div>
+                    </div>
+                    <div class='flex mt-3'>
+                        <div class='flex  '>
+                            <label class='w-[10%] h-[80%]'>Comment</label>
+                            <textarea rows="8" cols="100" name="comment" form="usrform"
+                                class='border  overflow-y-scroll'>
+                        </textarea>
+                        </div>
+                        <div class='ml-3 mt-10 flex gap-4 flex-col'>
+                            <div class='flex w-[135px] '>
+                                <label class='w-[50%]'>Doses</label>
+                                <input type="text" class='border w-[97px]' />
+                            </div>
+                            <div class='flex w-[190px] '>
+                                <label class='w-[50%]'>Volume of diuent</label>
+                                <input type="text" class='border w-[40px]' />
+                            </div>
+                        </div>
+                    </div>
+                    <div class='mt-3'>
+                        <p>Disease Statistics (Nr. of Patients)</p>
+                        <div class='flex gap-16'>
+                            <div class='bg-orange-300 w-[120px] mt-3'>
+                                <div class='flex w-[205px]'>
+                                    <label class='w-[120px] flex items-center justify-between'>Aspermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500  ' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[205px]'>
+                                    <label class='w-[120px] flex items-center justify-between'>Azoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500 ' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[205px]'>
+                                    <label class='w-[120px] flex items-center justify-between'>Necrozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500 ' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[205px]'>
+                                    <label class='w-[120px] flex items-center justify-between'>Normozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500 ' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='bg-orange-300 w-[130px] h-[55px] mt-3'>
+                                <div class='flex w-[155px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Asthenozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[155px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Oligozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[155px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Teratozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='bg-orange-300 w-[150px] h-[55px] mt-3'>
+                                <div class='flex w-[185px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Asthenoteratozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[185px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Oligoasthenozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[185px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Oligoteratozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                            <div class='bg-orange-300 w-[170px] mt-3'>
+                                <div class='flex w-[210px]'>
+                                    <label
+                                        class='w-[90%] flex items-center justify-between'>Oligoasthenoteratozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[210px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Cryptozoospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[210px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Leukospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                                <div class='flex w-[210px]'>
+                                    <label class='w-[90%] flex items-center justify-between'>Haemospermia
+                                        <BiSolidRightArrow class='text-[15px] text-blue-500' />
+                                    </label>
+                                    <input type="text" class='border w-[40px]' />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown(dropdownId) {
+            var dropdown = document.getElementById(dropdownId);
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.id !== dropdownId) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+            dropdown.classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        // Get the modals
+        var modals = document.getElementsByClassName("modal");
+
+        // Get the buttons that open the modals
+        var btns = document.getElementsByClassName("myBtn");
+
+        // Get the <span> elements that close the modals
+        var spans = document.getElementsByClassName("close");
+
+        // Function to open the corresponding modal
+        function openModal(index) {
+            modals[index].style.display = "block";
+        }
+
+        // Function to close the corresponding modal
+        function closeModal(index) {
+            modals[index].style.display = "none";
+        }
+
+        // Loop through all the buttons to attach click event listeners
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener("click", (function (index) {
+                return function () {
+                    openModal(index);
+                }
+            })(i));
+        }
+
+        // Loop through all the spans to attach click event listeners
+        for (var i = 0; i < spans.length; i++) {
+            spans[i].addEventListener("click", (function (index) {
+                return function () {
+                    closeModal(index);
+                }
+            })(i));
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            for (var i = 0; i < modals.length; i++) {
+                if (event.target == modals[i]) {
+                    closeModal(i);
+                }
+            }
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Open Modal 1
+            document.getElementById('openModal1').addEventListener('click', function () {
+                document.getElementById('myModal1').style.display = 'block';
+            });
+
+            // Close Modal 1
+            document.getElementById('closeModal1').addEventListener('click', function () {
+                document.getElementById('myModal1').style.display = 'none';
+            });
+
+            // Open Modal 2
+            document.getElementById('openModal2').addEventListener('click', function () {
+                document.getElementById('myModal2').style.display = 'block';
+            });
+
+            // Close Modal 2
+            document.getElementById('closeModal2').addEventListener('click', function () {
+                document.getElementById('myModal2').style.display = 'none';
+            });
+
+            // Close any modal
+            const closeModalBtns = document.querySelectorAll('.closeModalBtn');
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const modal = this.closest('.modal');
+                    modal.style.display = 'none';
+                });
+            });
+        });
+
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const openModalBtn = document.getElementById("openModal");
+            const closeModalBtn = document.getElementById("closeModal");
+            const modal = document.getElementById("modal");
+            const triggerPopupBtn = document.getElementById("triggerPopup");
+            const popupContent = document.getElementById("popupContent");
+            const closeModalBtn2 = document.getElementById("closeModalBtn");
+
+            openModalBtn.addEventListener("click", function () {
+                modal.classList.add("show");
+            });
+
+            closeModalBtn.addEventListener("click", function () {
+                modal.classList.remove("show");
+            });
+
+            triggerPopupBtn.addEventListener("click", function () {
+                popupContent.classList.toggle("show");
+            });
+
+            closeModalBtn2.addEventListener("click", function () {
+                modal.classList.remove("show");
+            });
+        });
+
+    </script>
+    <script src="script.js"></script>
+</body>
+
 </html>
