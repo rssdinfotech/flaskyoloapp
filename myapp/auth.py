@@ -11,7 +11,7 @@ def authenticate_user(username, password):
     
     try:
         # # Connect to the database
-        cursor = mysql.connection.cursor()
+        cursor = mysql.cursor()
 
 
         # # Execute a query to fetch the user's credentials

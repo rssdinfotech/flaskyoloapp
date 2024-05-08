@@ -78,13 +78,13 @@ def process_video():
 def save_process_video_output(total_sperm,high_speed_sperm,medium_speed_sperm,low_speed_sperm,dead_sperm):
     try:
         # # Connect to the database
-        cursor = mysql.connection.cursor()
+        cursor = mysql.cursor()
  
         cursor.execute("INSERT INTO process_results (total_sperm, high_speed_sperm, medium_speed_sperm, low_speed_sperm, dead_sperm) VALUES (%s, %s, %s, %s, %s)",
                        (total_sperm, high_speed_sperm, medium_speed_sperm, low_speed_sperm, dead_sperm))
 
            # Commit the transaction
-        mysql.connection.commit()
+        mysql.commit()
         
         
         cursor.close()
@@ -99,7 +99,7 @@ def save_process_video_output(total_sperm,high_speed_sperm,medium_speed_sperm,lo
 def get_last_inserted_record():
     try:
         # Connect to the database
-        cursor = mysql.connection.cursor()
+        cursor = mysql.cursor()
 
         # Execute a query to retrieve the last inserted record
         cursor.execute("SELECT * FROM process_results ORDER BY id DESC LIMIT 1")
@@ -110,6 +110,7 @@ def get_last_inserted_record():
         # Close the cursor
         cursor.close()
         # Return the last inserted record
+        print(last_inserted_record)
         return last_inserted_record
 
     except Exception as e:
