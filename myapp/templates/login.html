@@ -155,6 +155,12 @@
         id="password"
       />
 
+      <p id="message"></p>
+      <p>
+
+          <a href="/logout">logout</a>
+      </p>
+
       <input type="submit" value="Log In" />
     </form>
 
@@ -181,7 +187,12 @@
             body: JSON.stringify(userDetails), // Convert user details to JSON format
           })
             .then((response) => {
-              if (!response.ok) {
+
+                if (!response.ok) {
+                if(response.status=== 401){
+                    document.getElementById('message').innerHTML='Wrong username or password'
+                }
+                    // alert()
                 throw new Error("Network response was not ok");
               }
               return response.json();
