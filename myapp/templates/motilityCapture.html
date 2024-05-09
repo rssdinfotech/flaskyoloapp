@@ -35,12 +35,13 @@
             Process Video
           </button>
         </div>
+        <form action="0.php" method="post" enctype="multipart/form-data" name="addroom" class="width-100">
         <div class="mb-4">
           <input
             id="total"
-            type="number"
+            type="number" 
             class="w-full border rounded-md p-2 mb-2"
-            placeholder="Total Sperms Count 1"
+            placeholder="Total Sperms Count"
             readonly
           />
           <input
@@ -72,6 +73,7 @@
             readonly
           />
           <input type="submit" name="submit" value="SUBMIT">
+        </form>
         </div>
         <div id="statusMessage" class="text-red-600"></div>
       </div>
