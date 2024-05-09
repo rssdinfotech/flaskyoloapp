@@ -167,7 +167,7 @@
                 .then(blob => {
                     const formData = new FormData();
                     formData.append('image', blob);
-                    fetch('http://localhost:5000/process_image', {
+                    fetch('/process_image', {
                         method: 'POST',
                         body: formData
                     })
