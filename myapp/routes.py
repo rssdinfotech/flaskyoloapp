@@ -1,5 +1,7 @@
 # routes.py
-from flask import Flask, render_template, request, jsonify, send_file,session,redirect,url_for,Response
+import base64
+import cv2
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, Response
 from werkzeug.utils import secure_filename
 import os
 import subprocess
