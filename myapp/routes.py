@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, jsonify, send_file,session,re
 from werkzeug.utils import secure_filename
 import os
 import subprocess
-from utils import clean_uploads_folder, allowed_file, clean_runs_folder
+from utils import clean_uploads_folder, allowed_file, draw_boundaries
 # from aimodel import process_video
 from auth import auth_login,auth_logout
 from wsgi import app
@@ -12,7 +12,6 @@ from werkzeug.utils import secure_filename
 import numpy as np
 import pandas as pd
 from processvideo import process_video, get_last_inserted_record
-from utils.helper import draw_boundaries
 
 UPLOAD_FOLDER = 'static/uploads'
 VIDEO_FOLDER = 'runs/detect/predict/'
