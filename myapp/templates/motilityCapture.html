@@ -1,219 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Motilitycapture</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div class="flex">
-      <!-- Left side: Video display -->
-      <div class="w-2/3 p-4">
-        <h1 class="text-lg font-bold mb-4">Video Display</h1>
-        <video id="uploadedVideo" class="w-full" controls>
-          <source id="videoSource" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
+</head>
 
-      <!-- Right side: Options and buttons -->
-      <div class="w-1/3 p-4">
-        <h1 class="text-lg font-bold mb-4">Options</h1>
-        <div class="mb-4">
-          <button
-            id="uploadBtn"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          >
-            Upload Video
-          </button>
-          <button
-            id="processBtn"
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
-            disabled
-          >
-            Process Video
-          </button>
+<body>
+    <div class="flex">
+        <!-- Left side: Video display -->
+        <div class="w-2/3 p-4">
+            <h1 class="text-lg font-bold mb-4">Video Display</h1>
+            <video id="uploadedVideo"  class="w-full" controls>
+                <source id="videoSource" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <img id="imgSperm" class="img-sperm" src="">
         </div>
-        
-        <div class="mb-4">
-          <form action="0.php" method="post" enctype="multipart/form-data" name="addroom" class="width-100">
-          <input
-            id="total"
-            type="number" 
-            name="total"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Total Sperms Count"
-            readonly
-          />
-             
-          <input
-            id="high_speed"
-            type="number" name="high"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="High Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="medium_speed"
-            type="number" name="medium"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Medium Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="low_speed"
-            type="number" name="low"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Low Speed Sperms Count"
-            readonly
-          />
-          <input
-            id="dead"
-            type="number" name="dead"
-            class="w-full border rounded-md p-2 mb-2"
-            placeholder="Dead Sperms Count"
-            readonly
-          />
-          <input type="submit" name="submit" value="SUBMIT">
-        </form>
+
+        <!-- Right side: Options and buttons -->
+        <div class="w-1/3 p-4">
+            <h1 class="text-lg font-bold mb-4">Options</h1>
+            <div class="mb-4">
+                <button id="uploadBtn"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2">
+                    Upload Video
+                </button>
+                <button id="processBtn"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full" disabled>
+                    Process Video
+                </button>
+                <button id="snap" onclick="captureImage()"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">Capture</button>
+                    <br>
+                    <br>
+                <input type="file" id="file" onchange="updateImage()">
+            </div>
+
+            <div class="mb-4">
+                <form action="0.php" method="post" enctype="multipart/form-data" name="addroom" class="width-100">
+                    <input id="total" type="number" name="total" class="w-full border rounded-md p-2 mb-2"
+                        placeholder="Total Sperms Count" readonly />
+
+                    <input id="high_speed" type="number" name="high" class="w-full border rounded-md p-2 mb-2"
+                        placeholder="High Speed Sperms Count" readonly />
+                    <input id="medium_speed" type="number" name="medium" class="w-full border rounded-md p-2 mb-2"
+                        placeholder="Medium Speed Sperms Count" readonly />
+                    <input id="low_speed" type="number" name="low" class="w-full border rounded-md p-2 mb-2"
+                        placeholder="Low Speed Sperms Count" readonly />
+                    <input id="dead" type="number" name="dead" class="w-full border rounded-md p-2 mb-2"
+                        placeholder="Dead Sperms Count" readonly />
+                    <input type="submit" name="submit" value="SUBMIT">
+                </form>
+            </div>
+            <div id="statusMessage" class="text-red-600"></div>
         </div>
-        <div id="statusMessage" class="text-red-600"></div>
-      </div>
     </div>
 
     <!-- File input and upload button -->
     <input type="file" id="fileInput" class="hidden" />
 
     <script>
-      // below js is just for styling
-      // File input and upload button
-      const fileInput = document.getElementById("fileInput");
-      const uploadBtn = document.getElementById("uploadBtn");
-      const processBtn = document.getElementById("processBtn");
-      const statusMessage = document.getElementById("statusMessage");
+        // below js is just for styling
+        // File input and upload button
+        const fileInput = document.getElementById("fileInput");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const processBtn = document.getElementById("processBtn");
+        const statusMessage = document.getElementById("statusMessage");
 
-      // Function to handle file upload
+        // Function to handle file upload
 
-      const videoplayer = document.getElementById("player");
-      function handleFileUpload(file) {
-        const formData = new FormData();
-        formData.append("video", file);
+        const videoplayer = document.getElementById("player");
+        function handleFileUpload(file) {
+            const formData = new FormData();
+            formData.append("video", file);
 
-        fetch("/upload", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Upload failed");
+            fetch("/upload", {
+                method: "POST",
+                body: formData,
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Upload failed");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Upload successful:", data);
+                    // Enable the process button after successful upload
+                    document.getElementById("processBtn").disabled = false;
+                    // Set the source of the uploaded video element
+
+                    document.getElementById("uploadedVideo").pause(); // Reload the video player
+                    document.getElementById("videoSource").src =
+                        "/static/uploads/" + data.filename;
+                    document.getElementById("uploadedVideo").load(); // Reload the video player
+                    document.getElementById("uploadedVideo").play(); // Start playing the video
+
+                    statusMessage.textContent = "Upload Successful";
+                    localStorage.setItem("filename", data.filename);
+                })
+                .catch((error) => {
+                    console.error("Error uploading file:", error);
+                });
+        }
+
+        // Function to process the video
+        function processVideo() {
+            statusMessage.textContent = "Processing you video please wait";
+
+            const filename = localStorage.getItem("filename");
+            fetch("/process-video", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ filename: filename }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(data);
+                    // Fill input fields with processed data
+                    document.getElementById("total").value = data.total;
+                    document.getElementById("high_speed").value = data.high_speed;
+                    document.getElementById("medium_speed").value = data.medium_speed;
+                    document.getElementById("low_speed").value = data.low_speed;
+                    document.getElementById("dead").value = data.dead;
+
+                    document.getElementById("uploadedVideo").pause(); // Reload the video player
+                    document.getElementById("videoSource").src =
+                        "/get-video/" + filename;
+                    document.getElementById("uploadedVideo").load(); // Reload the video player
+                    document.getElementById("uploadedVideo").play(); // Start playing the video
+
+
+
+                    statusMessage.textContent = "Video processing successful";
+                    statusMessage.classList.remove("text-red-600");
+                    statusMessage.classList.add("text-green-600");
+
+
+                })
+                .catch((error) => {
+                    statusMessage.textContent = "Video processing failed";
+                    statusMessage.classList.remove("text-green-600");
+                    statusMessage.classList.add("text-red-600");
+                    console.error(
+                        "There was a problem with the fetch operation:",
+                        error
+                    );
+                });
+        }
+
+
+        function captureImage() {
+            const imgElement = document.getElementById("imgSperm");
+            fetch(imgElement.src)
+                .then(response => response.blob())
+                .then(blob => {
+                    const formData = new FormData();
+                    formData.append('image', blob);
+                    fetch('http://localhost:5000/process_image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            imgElement.src = data.imageData;
+                            document.getElementById("total").value = data.halo_counts.total;
+                            document.getElementById("high_speed").value = data.halo_counts.big;
+                            document.getElementById("medium_speed").value = data.halo_counts.medium;
+                            document.getElementById("low_speed").value = data.halo_counts.small;
+                            document.getElementById("dead").value = data.halo_counts.dead;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                });
+        }
+
+        function updateImage() {
+            const fileInput = document.getElementById("file");
+            const imgElement = document.getElementById("imgSperm");
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imgElement.src = e.target.result;
             }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Upload successful:", data);
-            // Enable the process button after successful upload
-            document.getElementById("processBtn").disabled = false;
-            // Set the source of the uploaded video element
+            reader.readAsDataURL(file);
 
-            document.getElementById("uploadedVideo").pause(); // Reload the video player
-            document.getElementById("videoSource").src =
-              "/static/uploads/" + data.filename;
-            document.getElementById("uploadedVideo").load(); // Reload the video player
-            document.getElementById("uploadedVideo").play(); // Start playing the video
+            document.getElementById("TotalSpermCount").value = null;
+            document.getElementById("HighSpeedSpermCount").value = null;
+            document.getElementById("MediumSpeedSpermCount").value = null;
+            document.getElementById("LowSpeedSpermCount").value = null;
+            document.getElementById("DeadSpermCount").value = null;
+        }
 
-            statusMessage.textContent = "Upload Successful";
-            localStorage.setItem("filename", data.filename);
-          })
-          .catch((error) => {
-            console.error("Error uploading file:", error);
-          });
-      }
+        // Event listener for file input change
+        document
+            .getElementById("fileInput")
+            .addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+            });
 
-      // Function to process the video
-      function processVideo() {
-        statusMessage.textContent = "Processing you video please wait";
-
-        const filename = localStorage.getItem("filename");
-        fetch("/process-video", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: filename }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log(data);
-            // Fill input fields with processed data
-            document.getElementById("total").value = data.total;
-            document.getElementById("high_speed").value = data.high_speed;
-            document.getElementById("medium_speed").value = data.medium_speed;
-            document.getElementById("low_speed").value = data.low_speed;
-            document.getElementById("dead").value = data.dead;
-
-            document.getElementById("uploadedVideo").pause(); // Reload the video player
-            document.getElementById("videoSource").src =
-              "/get-video/" + filename;
-            document.getElementById("uploadedVideo").load(); // Reload the video player
-            document.getElementById("uploadedVideo").play(); // Start playing the video
-
-
-
-            statusMessage.textContent = "Video processing successful";
-            statusMessage.classList.remove("text-red-600");
-            statusMessage.classList.add("text-green-600");
-
-      
-          })
-          .catch((error) => {
-            statusMessage.textContent = "Video processing failed";
-            statusMessage.classList.remove("text-green-600");
-            statusMessage.classList.add("text-red-600");
-            console.error(
-              "There was a problem with the fetch operation:",
-              error
-            );
-          });
-      }
-
-      // Event listener for file input change
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", (event) => {
-          const file = event.target.files[0];
-          if (file) {
-            handleFileUpload(file);
-          }
+        // Event listener for upload button click
+        document.getElementById("uploadBtn").addEventListener("click", () => {
+            document.getElementById("fileInput").click();
         });
 
-      // Event listener for upload button click
-      document.getElementById("uploadBtn").addEventListener("click", () => {
-        document.getElementById("fileInput").click();
-      });
+        // Event listener for process button click
+        document
+            .getElementById("processBtn")
+            .addEventListener("click", processVideo);
 
-      // Event listener for process button click
-      document
-        .getElementById("processBtn")
-        .addEventListener("click", processVideo);
+        // // Event listener for upload button click
+        // uploadBtn.addEventListener("click", () => {
+        //   fileInput.click();
+        // });
 
-      // // Event listener for upload button click
-      // uploadBtn.addEventListener("click", () => {
-      //   fileInput.click();
-      // });
-
-      // Event listener for file input change
-      fileInput.addEventListener("change", () => {
-        processBtn.disabled = false;
-        statusMessage.textContent = "";
-      });
+        // Event listener for file input change
+        fileInput.addEventListener("change", () => {
+            processBtn.disabled = false;
+            statusMessage.textContent = "";
+        });
 
 
     </script>
-  </body>
+</body>
+
 </html>

@@ -11,7 +11,8 @@ from ultralytics import YOLO
 from werkzeug.utils import secure_filename
 import numpy as np
 import pandas as pd
-from processvideo import process_video,get_last_inserted_record
+from processvideo import process_video, get_last_inserted_record
+from utils.helper import draw_boundaries
 
 UPLOAD_FOLDER = 'static/uploads'
 VIDEO_FOLDER = 'runs/detect/predict/'
@@ -112,6 +113,18 @@ def get_video(filename):
         return 'File not found', 404
 
 
+@app.route('/process_image', methods=['POST'])
+def process_image():
+    file = request.files['image']
+    if not file:
+        return "No file uploaded", 400
+
+    img = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    contour_img, halo_counts = draw_boundaries(img)
+    _, img_encoded = cv2.imencode('.png', contour_img)
+    img_data = img_encoded.tobytes()
+    img_data_b64 = base64.b64encode(img_data).decode('utf-8')  # Encode to base64
+    return jsonify({'imageData': f'data:image/png;base64,{img_data_b64}', 'halo_counts': halo_counts})
 
 
 if __name__ == '__main__':
