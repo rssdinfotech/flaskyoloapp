@@ -23,7 +23,6 @@ UPLOAD_FOLDER = 'static/uploads'
 VIDEO_FOLDER = 'runs/detect/predict/'
 RUNS_FOLDER = 'static/runs'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'wmv', 'flv'}
-app.config['UPLOAD_FOLDER'] = './dist/camera/'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'mp4'}
 
 def login_required(func):
