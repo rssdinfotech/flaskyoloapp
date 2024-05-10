@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motilitycapture</title>
+    <title>DNA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <style>
     /* .grid-column-3-width {
@@ -56,18 +57,18 @@
 <body>
 
     <div class="cam overflow-hidden text-red-900">
-        <!-- <div class="video-cam overflow-y-auto">
-            <video id="video" playsinline autoplay></video>
-        </div> -->
-
         <div>
-            <img id="imgSperm" class="img-sperm" src="DNA_images/image17.jpg">
+            <img id="imgSperm" class="img-sperm" src="">
         </div>
         <div class="capture-side">
-            <button id="snap" onclick="captureImage()" class="capture">Capture</button>
-            <input type="file" id="file" onchange="updateImage()">
+            <button id="uploadBtn"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Browse</button>
+            <button id="snap" onclick="captureImage()"
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">Capture</button>
+            <input type="file" id="fileInput" class="hidden" />
             <div alig="center">
-                <form action="https://www.rssdinfotech.com/prime/1.php" method="post" enctype="multipart/form-data" name="addroom" name="addroom">
+                <form action="https://www.rssdinfotech.com/prime/1.php" method="post" enctype="multipart/form-data"
+                    name="addroom" name="addroom">
                     <label for="TotalSpermCount">Total DNA:</label>
                     <input type="number" class="capture" id="TotalSpermCount" name="total"
                         placeholder="Enter Total Sperm Count" required>
@@ -84,64 +85,25 @@
                     <input type="number" class="capture" id="LowSpeedSpermCount" name="c"
                         placeholder="Enter Low Speed Sperm Count" required>
 
-                    
+
                     <input type="submit" class="capture" name="submit">
                 </form>
             </div>
         </div>
-
     </div>
-
-    <!-- <div class='side'>
-        <div class='text-center'>
-            <label class='font-bold '>April, 2024 </label>
-            <div class='overflow-y-scroll pt-[500px] mt-[-30px]'></div>
-        </div>
-    </div> -->
-
-    <!-- <canvas id="canvas" width="640" height="480"></canvas> -->
-    <!-- <script>
-
-        'use strict';
-
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const snap = document.getElementById("snap");
-        const errorMsgElement = document.querySelector('span#errorMsg');
-
-        const constraints = {
-            audio: true,
-            video: {
-                width: 1280, height: 720
-            }
-        };
-
-        // Access webcam
-        async function init() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                handleSuccess(stream);
-            } catch (e) {
-                errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
-            }
-        }
-
-        // Success
-        function handleSuccess(stream) {
-            window.stream = stream;
-            video.srcObject = stream;
-        }
-
-        // Load init
-        init();
-
-        // Draw image
-        var context = canvas.getContext('2d');
-        snap.addEventListener("click", function () {
-            context.drawImage(video, 0, 0, 640, 480);
-        });
-    </script> -->
     <script>
+
+        const uploadBtn = document.getElementById("uploadBtn");
+
+        document.getElementById("fileInput").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                updateImage(file);
+            }
+        });
+        document.getElementById("uploadBtn").addEventListener("click", () => {
+            document.getElementById("fileInput").click();
+        });
         function captureImage() {
             const imgElement = document.getElementById("imgSperm");
             fetch(imgElement.src)
@@ -149,18 +111,41 @@
                 .then(blob => {
                     const formData = new FormData();
                     formData.append('image', blob);
-                    fetch('/process_image', {
+                    fetch('http://127.0.0.1:5000/process_image', {
                         method: 'POST',
                         body: formData
                     })
                         .then(response => response.json())
                         .then(data => {
+                            const imgElement = document.getElementById("imgSperm");
                             imgElement.src = data.imageData;
                             document.getElementById("TotalSpermCount").value = data.halo_counts.total;
                             document.getElementById("HighSpeedSpermCount").value = data.halo_counts.big;
                             document.getElementById("MediumSpeedSpermCount").value = data.halo_counts.medium;
                             document.getElementById("LowSpeedSpermCount").value = data.halo_counts.small;
                             document.getElementById("DeadSpermCount").value = data.halo_counts.dead;
+
+                            // Change code here
+                            fetch(imgElement.src)
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    const formData = new FormData();
+                                    formData.append('image', blob, 'capture.png');
+                                    // Add additional data here
+                                    formData.append('totalSpermCount', document.getElementById("TotalSpermCount").value);
+                                    formData.append('highSpeedSpermCount', document.getElementById("HighSpeedSpermCount").value);
+                                    // More fields can be added similarly
+                                    fetch('http://127.0.0.1:5000/upload-image', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                        .then(response => response.json())
+                                        .then(data => console.log('Success:', data))
+                                        .catch(error => console.error('Error:', error));
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching image:', error);
+                                });
                         })
                         .catch(error => {
                             console.error('Error:', error);
@@ -171,22 +156,21 @@
                 });
         }
 
-        function updateImage() {
-            const fileInput = document.getElementById("file");
+        function updateImage(file) {
             const imgElement = document.getElementById("imgSperm");
-            const file = fileInput.files[0];
             const reader = new FileReader();
             reader.onload = function (e) {
                 imgElement.src = e.target.result;
+                // Clear the previously displayed counts when a new image is loaded
+                document.getElementById("TotalSpermCount").value = '';
+                document.getElementById("HighSpeedSpermCount").value = '';
+                document.getElementById("MediumSpeedSpermCount").value = '';
+                document.getElementById("LowSpeedSpermCount").value = '';
+                document.getElementById("DeadSpermCount").value = '';
             }
             reader.readAsDataURL(file);
-
-            document.getElementById("TotalSpermCount").value = null;
-            document.getElementById("HighSpeedSpermCount").value = null;
-            document.getElementById("MediumSpeedSpermCount").value = null;
-            document.getElementById("LowSpeedSpermCount").value = null;
-            document.getElementById("DeadSpermCount").value = null;
         }
+
     </script>
 </body>
 

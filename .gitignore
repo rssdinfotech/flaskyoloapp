@@ -1,0 +1,10 @@
+
+myapp/__pycache__/wsgi.cpython-39.pyc
+myapp/__pycache__/auth.cpython-39.pyc
+myapp/.idea/workspace.xml
+myapp/.idea/vcs.xml
+myapp/.idea/misc.xml
+myapp/.idea/inspectionProfiles/Project_Default.xml
+myapp/.idea/inspectionProfiles/profiles_settings.xml
+.vscode/settings.json
+myapp/utils/__pycache__/helper.cpython-310.pyc

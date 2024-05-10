@@ -13,11 +13,7 @@
         <!-- Left side: Video display -->
         <div class="w-2/3 p-4">
             <h1 class="text-lg font-bold mb-4">Video Display</h1>
-            <video id="uploadedVideo"  class="w-full" controls>
-                <source id="videoSource" type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-            <img id="imgSperm" class="img-sperm" src="">
+            <img id="video" class="img-sperm"></img>
         </div>
 
         <!-- Right side: Options and buttons -->
@@ -35,7 +31,8 @@
             </div>
 
             <div class="mb-4">
-                <form action="https://www.rssdinfotech.com/prime/0.php" method="post" enctype="multipart/form-data" name="addroom" class="width-100">
+                <form action="https://www.rssdinfotech.com/prime/0.php" method="post" enctype="multipart/form-data"
+                    name="addroom" class="width-100">
                     <input id="total" type="number" name="total" class="w-full border rounded-md p-2 mb-2"
                         placeholder="Total Sperms Count" readonly />
 
@@ -202,7 +199,11 @@
             statusMessage.textContent = "";
         });
 
-
+        var videoElement = document.getElementById('video');
+        var socket = io.connect('http://localhost:5000');
+        socket.on('image_frame', function (data) {
+            videoElement.src = 'data:image/jpeg;base64,' + data.image;
+        });
     </script>
 </body>
 
