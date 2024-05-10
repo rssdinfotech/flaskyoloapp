@@ -111,7 +111,7 @@
                 .then(blob => {
                     const formData = new FormData();
                     formData.append('image', blob);
-                    fetch('http://127.0.0.1:5000/process_image', {
+                    fetch('/process_image', {
                         method: 'POST',
                         body: formData
                     })
@@ -135,7 +135,7 @@
                                     formData.append('totalSpermCount', document.getElementById("TotalSpermCount").value);
                                     formData.append('highSpeedSpermCount', document.getElementById("HighSpeedSpermCount").value);
                                     // More fields can be added similarly
-                                    fetch('http://127.0.0.1:5000/upload-image', {
+                                    fetch('/upload-image', {
                                         method: 'POST',
                                         body: formData
                                     })
