@@ -79,6 +79,13 @@ def home():
 def motilitycapture():
     return render_template('motilityCapture.html')
 
+
+@app.route('/Dna',methods=['GET'])
+@login_required
+def motilitycapture():
+    return render_template('Dna.html')
+
+
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
