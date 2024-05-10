@@ -13,7 +13,11 @@
         <!-- Left side: Video display -->
         <div class="w-2/3 p-4">
             <h1 class="text-lg font-bold mb-4">Video Display</h1>
-            <img id="video" class="img-sperm"></img>
+            <video id="uploadedVideo"  class="w-full" controls>
+                <source id="videoSource" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <!-- <img id="video" class="img-sperm"></img> -->
         </div>
 
         <!-- Right side: Options and buttons -->
@@ -199,11 +203,11 @@
             statusMessage.textContent = "";
         });
 
-        var videoElement = document.getElementById('video');
-        var socket = io.connect('http://localhost:5000');
-        socket.on('image_frame', function (data) {
-            videoElement.src = 'data:image/jpeg;base64,' + data.image;
-        });
+        // var videoElement = document.getElementById('video');
+        // var socket = io.connect('http://localhost:5000');
+        // socket.on('image_frame', function (data) {
+        //     videoElement.src = 'data:image/jpeg;base64,' + data.image;
+        // });
     </script>
 </body>
 
