@@ -32,11 +32,6 @@
                     class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full" disabled>
                     Process Video
                 </button>
-                <button id="snap" onclick="captureImage()"
-                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">Capture</button>
-                    <br>
-                    <br>
-                <input type="file" id="file" onchange="updateImage()">
             </div>
 
             <div class="mb-4">
@@ -156,36 +151,6 @@
                         "There was a problem with the fetch operation:",
                         error
                     );
-                });
-        }
-
-
-        function captureImage() {
-            const imgElement = document.getElementById("imgSperm");
-            fetch(imgElement.src)
-                .then(response => response.blob())
-                .then(blob => {
-                    const formData = new FormData();
-                    formData.append('image', blob);
-                    fetch('/process_image', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            imgElement.src = data.imageData;
-                            document.getElementById("total").value = data.halo_counts.total;
-                            document.getElementById("high_speed").value = data.halo_counts.big;
-                            document.getElementById("medium_speed").value = data.halo_counts.medium;
-                            document.getElementById("low_speed").value = data.halo_counts.small;
-                            document.getElementById("dead").value = data.halo_counts.dead;
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                })
-                .catch(error => {
-                    console.error('Error fetching image:', error);
                 });
         }
 
