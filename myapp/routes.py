@@ -82,7 +82,7 @@ def motilitycapture():
 
 @app.route('/Dna',methods=['GET'])
 @login_required
-def motilitycapture():
+def dna():
     return render_template('Dna.html')
 
 
