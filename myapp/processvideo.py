@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify,se
 from ultralytics import YOLO
 import os
 import subprocess
-from utils import clean_uploads_folder, clean_runs_folder, allowed_file
+from utils_services import clean_uploads_folder, clean_runs_folder, allowed_file
 import numpy as np
 import pandas as pd
 from wsgi import app,mysql
