@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <style>
     /* .grid-column-3-width {
@@ -65,45 +66,138 @@
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Browse</button>
             <button id="snap" onclick="captureImage()"
                 class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">Capture</button>
+            <button id="detectCameraBtn"
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">Detect Camera</button>
+
             <input type="file" id="fileInput" class="hidden" />
-            <div alig="center">
+            <div align="center">
                 <form action="https://www.rssdinfotech.com/prime/1.php" method="post" enctype="multipart/form-data"
-                    name="addroom" name="addroom">
-                    <label for="TotalSpermCount">Total DNA:</label>
-                    <input type="number" class="capture" id="TotalSpermCount" name="total"
-                        placeholder="Enter Total Sperm Count" required>
+                    name="addroom">
+                    <label for="Norm">Norm:</label>
+                    <input type="number" class="capture" id="Norm" name="total" placeholder="Enter Norm Sperm Count"
+                        required>
 
-                    <label for="HighSpeedSpermCount">Big Hallow:</label>
-                    <input type="number" class="capture" id="HighSpeedSpermCount" name="a"
-                        placeholder="Enter High Speed Sperm Count" required>
+                    <label for="Tapered">Tapered:</label>
+                    <input type="number" class="capture" id="Tapered" name="a" placeholder="Enter Tapered Sperm Count"
+                        required>
 
-                    <label for="MediumSpeedSpermCount">Medium Hallow:</label>
-                    <input type="number" class="capture" id="MediumSpeedSpermCount" name="b"
-                        placeholder="Enter Medium Speed Sperm Count" required>
+                    <!-- Add new fields below -->
+                    <label for="Pyriform">Pyriform:</label>
+                    <input type="number" class="capture" id="Pyriform" name="pyriform"
+                        placeholder="Enter Pyriform Sperm Count" required>
 
-                    <label for="LowSpeedSpermCount">Small Hallow:</label>
-                    <input type="number" class="capture" id="LowSpeedSpermCount" name="c"
-                        placeholder="Enter Low Speed Sperm Count" required>
+                    <label for="Amorphous1">Amorphous1:</label>
+                    <input type="number" class="capture" id="Amorphous1" name="amorphous1"
+                        placeholder="Enter Amorphous1 Sperm Count" required>
 
+                    <label for="Amorphous2">Amorphous2:</label>
+                    <input type="number" class="capture" id="Amorphous2" name="amorphous2"
+                        placeholder="Enter Amorphous2 Sperm Count" required>
+
+                    <label for="Amorphous3">Amorphous3:</label>
+                    <input type="number" class="capture" id="Amorphous3" name="amorphous3"
+                        placeholder="Enter Amorphous3 Sperm Count" required>
+
+                    <label for="Vacuolated">Vacuolated:</label>
+                    <input type="number" class="capture" id="Vacuolated" name="vacuolated"
+                        placeholder="Enter Vacuolated Sperm Count" required>
+
+                    <label for="RoundNoAcrosome">Round no Acrosome:</label>
+                    <input type="number" class="capture" id="RoundNoAcrosome" name="roundNoAcrosome"
+                        placeholder="Enter Round no Acrosome Count" required>
+
+                    <label for="RoundSmall">Round Small:</label>
+                    <input type="number" class="capture" id="RoundSmall" name="roundSmall"
+                        placeholder="Enter Round Small Count" required>
+
+                    <label for="SmallAcrosome">Small Acrosome:</label>
+                    <input type="number" class="capture" id="SmallAcrosome" name="smallAcrosome"
+                        placeholder="Enter Small Acrosome Count" required>
+
+                    <label for="DoubleHead">Double Head:</label>
+                    <input type="number" class="capture" id="DoubleHead" name="doubleHead"
+                        placeholder="Enter Double Head Count" required>
+
+                    <label for="Pinhead">Pinhead:</label>
+                    <input type="number" class="capture" id="Pinhead" name="pinhead" placeholder="Enter Pinhead Count"
+                        required>
+
+                    <label for="BentNeck">Bent Neck:</label>
+                    <input type="number" class="capture" id="BentNeck" name="bentNeck"
+                        placeholder="Enter Bent Neck Count" required>
+
+                    <label for="Asymmetrical">Asymmetrical:</label>
+                    <input type="number" class="capture" id="Asymmetrical" name="asymmetrical"
+                        placeholder="Enter Asymmetrical Count" required>
+
+                    <label for="Thick">Thick:</label>
+                    <input type="number" class="capture" id="Thick" name="thick" placeholder="Enter Thick Count"
+                        required>
+
+                    <label for="Thin">Thin:</label>
+                    <input type="number" class="capture" id="Thin" name="thin" placeholder="Enter Thin Count" required>
+
+                    <label for="Short">Short:</label>
+                    <input type="number" class="capture" id="Short" name="short" placeholder="Enter Short Count"
+                        required>
+
+                    <label for="BentTail">Bent Tail:</label>
+                    <input type="number" class="capture" id="BentTail" name="bentTail"
+                        placeholder="Enter Bent Tail Count" required>
+
+                    <label for="Coiled">Coiled:</label>
+                    <input type="number" class="capture" id="Coiled" name="coiled" placeholder="Enter Coiled Count"
+                        required>
+
+                    <label for="ERC">ERC:</label>
+                    <input type="number" class="capture" id="ERC" name="erc" placeholder="Enter ERC Count" required>
+
+                    <label for="DoubleTail">Double Tail:</label>
+                    <input type="number" class="capture" id="DoubleTail" name="doubleTail"
+                        placeholder="Enter Double Tail Count" required>
 
                     <input type="submit" class="capture" name="submit">
                 </form>
             </div>
+
         </div>
     </div>
     <script>
 
         const uploadBtn = document.getElementById("uploadBtn");
-
+        let socket = null;
         document.getElementById("fileInput").addEventListener("change", (event) => {
             const file = event.target.files[0];
             if (file) {
                 updateImage(file);
+                if (socket) {
+                    socket.disconnect(); // Disconnect the socket if it's open
+                    socket = null;
+                    detectCameraBtn.textContent = "Detect Camera"; // Reset button text
+                }
             }
+
         });
         document.getElementById("uploadBtn").addEventListener("click", () => {
             document.getElementById("fileInput").click();
         });
+
+        document.getElementById('detectCameraBtn').addEventListener('click', function () {
+            if (!socket) {
+                // Start the camera detection
+                socket = io.connect('http://localhost:5000');
+                socket.on('image_frame', function (data) {
+                    imgElement.src = 'data:image/jpeg;base64,' + data.image;
+                });
+                detectCameraBtn.textContent = "Stop Camera"; // Change button text
+            } else {
+                // Stop the camera detection
+                socket.disconnect();
+                socket = null;
+                detectCameraBtn.textContent = "Detect Camera"; // Reset button text
+            }
+        });
+
         function captureImage() {
             const imgElement = document.getElementById("imgSperm");
             fetch(imgElement.src)
@@ -119,11 +213,28 @@
                         .then(data => {
                             const imgElement = document.getElementById("imgSperm");
                             imgElement.src = data.imageData;
-                            document.getElementById("TotalSpermCount").value = data.halo_counts.total;
-                            document.getElementById("HighSpeedSpermCount").value = data.halo_counts.big;
-                            document.getElementById("MediumSpeedSpermCount").value = data.halo_counts.medium;
-                            document.getElementById("LowSpeedSpermCount").value = data.halo_counts.small;
-                            document.getElementById("DeadSpermCount").value = data.halo_counts.dead;
+                            document.getElementById("Norm").value = data.halo_counts.Norm;
+                            document.getElementById("Tapered").value = data.halo_counts.Tapered;
+                            document.getElementById("Pyriform").value = data.halo_counts.Pyriform;
+                            document.getElementById("Amorphous1").value = data.halo_counts.Amorphous1;
+                            document.getElementById("Amorphous2").value = data.halo_counts.Amorphous2;
+                            document.getElementById("Amorphous3").value = data.halo_counts.Amorphous3;
+                            document.getElementById("Vacuolated").value = data.halo_counts.Vacuolated;
+                            document.getElementById("RoundNoAcrosome").value = data.halo_counts["Round no Acrosome"];
+                            document.getElementById("RoundSmall").value = data.halo_counts["Round Small"];
+                            document.getElementById("SmallAcrosome").value = data.halo_counts["Small Acrosome"];
+                            document.getElementById("DoubleHead").value = data.halo_counts["Double Head"];
+                            document.getElementById("Pinhead").value = data.halo_counts.Pinhead;
+                            document.getElementById("BentNeck").value = data.halo_counts["Bent Neck"];
+                            document.getElementById("Asymmetrical").value = data.halo_counts.Asymmetrical;
+                            document.getElementById("Thick").value = data.halo_counts.Thick;
+                            document.getElementById("Thin").value = data.halo_counts.Thin;
+                            document.getElementById("Short").value = data.halo_counts.Short;
+                            document.getElementById("BentTail").value = data.halo_counts["Bent Tail"];
+                            document.getElementById("Coiled").value = data.halo_counts.Coiled;
+                            document.getElementById("ERC").value = data.halo_counts.ERC;
+                            document.getElementById("DoubleTail").value = data.halo_counts["Double Tail"];
+
 
                             // Change code here
                             fetch(imgElement.src)
@@ -131,9 +242,6 @@
                                 .then(blob => {
                                     const formData = new FormData();
                                     formData.append('image', blob, 'capture.png');
-                                    // Add additional data here
-                                    formData.append('totalSpermCount', document.getElementById("TotalSpermCount").value);
-                                    formData.append('highSpeedSpermCount', document.getElementById("HighSpeedSpermCount").value);
                                     // More fields can be added similarly
                                     fetch('/upload-image', {
                                         method: 'POST',
@@ -162,11 +270,27 @@
             reader.onload = function (e) {
                 imgElement.src = e.target.result;
                 // Clear the previously displayed counts when a new image is loaded
-                document.getElementById("TotalSpermCount").value = '';
-                document.getElementById("HighSpeedSpermCount").value = '';
-                document.getElementById("MediumSpeedSpermCount").value = '';
-                document.getElementById("LowSpeedSpermCount").value = '';
-                document.getElementById("DeadSpermCount").value = '';
+                document.getElementById("Norm").value = '';
+                document.getElementById("Tapered").value = '';
+                document.getElementById("Pyriform").value = '';
+                document.getElementById("Amorphous1").value = '';
+                document.getElementById("Amorphous2").value = '';
+                document.getElementById("Amorphous3").value = '';
+                document.getElementById("Vacuolated").value = '';
+                document.getElementById("RoundNoAcrosome").value = '';
+                document.getElementById("RoundSmall").value = '';
+                document.getElementById("SmallAcrosome").value = '';
+                document.getElementById("DoubleHead").value = '';
+                document.getElementById("Pinhead").value = '';
+                document.getElementById("BentNeck").value = '';
+                document.getElementById("Asymmetrical").value = '';
+                document.getElementById("Thick").value = '';
+                document.getElementById("Thin").value = '';
+                document.getElementById("Short").value = '';
+                document.getElementById("BentTail").value = '';
+                document.getElementById("Coiled").value = '';
+                document.getElementById("ERC").value = '';
+                document.getElementById("DoubleTail").value = '';
             }
             reader.readAsDataURL(file);
         }
