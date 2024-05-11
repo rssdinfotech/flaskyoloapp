@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, jsonify, send_file, session, 
 from werkzeug.utils import secure_filename
 import os
 import subprocess
-from utils import clean_uploads_folder, allowed_file
+from utils_services import clean_uploads_folder, allowed_file
 from services.helper import draw_boundaries
 # from aimodel import process_video
 from auth import auth_login,auth_logout
