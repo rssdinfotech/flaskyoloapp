@@ -88,6 +88,9 @@
                     <input type="number" class="capture" id="LowSpeedSpermCount" name="c"
                         placeholder="Enter Low Speed Sperm Count" required>
 
+                    <label for="DustSpermCount">Dust Hallow:</label>
+                    <input type="number" class="capture" id="DustSpermCount" name="c"
+                        placeholder="Enter Dust Sperm Count" required>
 
                     <input type="submit" class="capture" name="submit">
                 </form>
@@ -150,7 +153,7 @@
                             document.getElementById("HighSpeedSpermCount").value = data.halo_counts.big;
                             document.getElementById("MediumSpeedSpermCount").value = data.halo_counts.medium;
                             document.getElementById("LowSpeedSpermCount").value = data.halo_counts.small;
-                            document.getElementById("DeadSpermCount").value = data.halo_counts.dead;
+                            document.getElementById("DustSpermCount").value = data.halo_counts.dead;
 
                             // Change code here
                             fetch(imgElement.src)
@@ -193,7 +196,7 @@
                 document.getElementById("HighSpeedSpermCount").value = '';
                 document.getElementById("MediumSpeedSpermCount").value = '';
                 document.getElementById("LowSpeedSpermCount").value = '';
-                document.getElementById("DeadSpermCount").value = '';
+                document.getElementById("DustSpermCount").value = '';
             }
             reader.readAsDataURL(file);
         }
