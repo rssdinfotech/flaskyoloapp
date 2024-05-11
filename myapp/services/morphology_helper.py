@@ -37,7 +37,7 @@ def draw_results(img, results, model_names):
     return img, halo_counts
 
 
-def draw_boundaries(img):
+def draw_boundaries_morphology(img):
     results = model(img)
     output_img, halo_counts = draw_results(img, results, model_names)
     return output_img, halo_counts

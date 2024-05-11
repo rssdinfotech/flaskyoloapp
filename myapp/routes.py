@@ -9,7 +9,8 @@ from werkzeug.utils import secure_filename
 import os
 import subprocess
 from utils_services import clean_uploads_folder, allowed_file
-from services.helper import draw_boundaries
+from services.morphology_helper import draw_boundaries_morphology
+from services.dna_helper import draw_boundaries_dna
 # from aimodel import process_video
 from auth import auth_login,auth_logout
 from wsgi import app
@@ -78,6 +79,12 @@ def home():
         return render_template('index.html',results=res)
 
 
+@app.route('/morphology',methods=['GET'])
+@login_required
+def morphology():
+    return render_template('morphology.html')
+
+
 @app.route('/motilitycapture',methods=['GET'])
 @login_required
 def motilitycapture():
@@ -125,14 +132,28 @@ def get_video(filename):
         return 'File not found', 404
 
 
-@app.route('/process_image', methods=['POST'])
-def process_image():
+@app.route('/process_image_morphology', methods=['POST'])
+def process_image_morphology():
     file = request.files['image']
     if not file:
         return "No file uploaded", 400
 
     img = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
-    contour_img, halo_counts = draw_boundaries(img)
+    contour_img, halo_counts = draw_boundaries_morphology(img)
+    _, img_encoded = cv2.imencode('.png', contour_img)
+    img_data = img_encoded.tobytes()
+    img_data_b64 = base64.b64encode(img_data).decode('utf-8')  # Encode to base64
+    return jsonify({'imageData': f'data:image/png;base64,{img_data_b64}', 'halo_counts': halo_counts})
+
+
+@app.route('/process_image_dna', methods=['POST'])
+def process_image_dna():
+    file = request.files['image']
+    if not file:
+        return "No file uploaded", 400
+
+    img = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    contour_img, halo_counts = draw_boundaries_dna(img)
     _, img_encoded = cv2.imencode('.png', contour_img)
     img_data = img_encoded.tobytes()
     img_data_b64 = base64.b64encode(img_data).decode('utf-8')  # Encode to base64
