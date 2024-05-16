@@ -256,21 +256,4 @@ class App:
 
 
 if __name__ == '__main__':
-    cam = App()  # Initialize your App which presumably starts the camera
-
-
-    def run_camera():
-        while True:
-            cam.run()
-            time.sleep(1)  # Adjust the sleep time based on how frequently you need to check or run camera operations
-
-
-    # Start the camera run loop in a separate thread
-    camera_thread = Thread(target=run_camera)
-    camera_thread.start()
-
-    # Start the Flask-SocketIO server
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
-
-    # Optionally, join the thread if you have a specific ending condition
-    camera_thread.join()
+    app.run(debug=True)
