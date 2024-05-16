@@ -16,6 +16,7 @@ mysql= pymysql.connect(host='localhost',
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'mp4', 'avi', 'mov', 'wmv', 'flv'}
 # # MySQL configurations
 # app.config['MYSQL_HOST'] = 'localhost'  # Change this to your MySQL host
 # app.config['MYSQL_USER'] = 'root'   # Change this to your MySQL username
