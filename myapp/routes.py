@@ -24,8 +24,8 @@ import toupcam
 UPLOAD_FOLDER = 'static/uploads'
 VIDEO_FOLDER = 'runs/detect/predict/'
 RUNS_FOLDER = 'static/runs'
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'wmv', 'flv'}
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'mp4'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'mp4', 'avi', 'mov', 'wmv', 'flv'}
+
 
 def login_required(func):
     def wrapper(*args, **kwargs):
