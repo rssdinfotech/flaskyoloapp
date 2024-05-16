@@ -26,7 +26,6 @@ VIDEO_FOLDER = 'runs/detect/predict/'
 RUNS_FOLDER = 'static/runs'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'mp4', 'avi', 'mov', 'wmv', 'flv'}
 
-
 def login_required(func):
     def wrapper(*args, **kwargs):
         if 'username' not in session:
@@ -111,7 +110,10 @@ def upload_file():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         clean_uploads_folder()
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        file.save(save_path)
         return jsonify({'message': 'File uploaded successfully', 'filename': filename})
     else:
         return jsonify({'error': 'File type not allowed'})
